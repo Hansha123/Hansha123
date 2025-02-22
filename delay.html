@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wait Before Access</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .message {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .countdown {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .progress {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(#4caf50 0% 0%, #ddd 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .progress::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: #f0f0f0;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">Why am I checking?</div>
+    <div class="progress">
+        <span class="countdown">0</span>
+    </div>
+
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return parseInt(urlParams.get(param)) || 10; // Default to 10 seconds if no param is provided
+        }
+
+        let timeLeft = getQueryParam('S');
+        const countdownElement = document.querySelector('.countdown');
+        const progressElement = document.querySelector('.progress');
+        const totalTime = timeLeft;
+
+        function updateUI() {
+            countdownElement.textContent = timeLeft;
+            let progressPercentage = ((totalTime - timeLeft) / totalTime) * 100;
+            progressElement.style.background = `conic-gradient(#4caf50 ${progressPercentage}%, #ddd ${progressPercentage}%)`;
+        }
+
+        function startCountdown() {
+            updateUI();
+            const timer = setInterval(() => {
+                timeLeft--;
+                updateUI();
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    window.location.href = new URLSearchParams(window.location.search).get('U') || 'https://duckduckgo.com';
+                }
+            }, 1000);
+        }
+
+        startCountdown();
+    </script>
+</body>
+</html>
