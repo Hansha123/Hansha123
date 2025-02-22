@@ -53,12 +53,24 @@
     </div>
 
     <script>
-        function getQueryParam(param) {
+        function getQueryParam(param, isString = false) {
             const urlParams = new URLSearchParams(window.location.search);
-            return parseInt(urlParams.get(param)) || 10; // Default to 10 seconds if no param is provided
+            if (isString) {
+                return urlParams.get(param) || ''; // Return string directly
+            }
+            return parseInt(urlParams.get(param)) || 10; // Default for numbers
         }
 
-        let timeLeft = getQueryParam('S');
+        let timeLeft = getQueryParam('S'); // Get delay time
+        let redirectUrl = getQueryParam('U', true); // Get blocked URL
+
+        // Prevent redirect loop: If already delayed, go straight to the blocked site
+        if (sessionStorage.getItem("delayCompleted") === redirectUrl) {
+            window.location.href = redirectUrl;
+        } else {
+            sessionStorage.setItem("delayCompleted", redirectUrl); // Mark as delayed
+        }
+
         const countdownElement = document.querySelector('.countdown');
         const progressElement = document.querySelector('.progress');
         const totalTime = timeLeft;
@@ -68,7 +80,7 @@
             let progressPercentage = ((totalTime - timeLeft) / totalTime) * 100;
             progressElement.style.background = `conic-gradient(#4caf50 ${progressPercentage}%, #ddd ${progressPercentage}%)`;
         }
-
+        
         function startCountdown() {
             updateUI();
             const timer = setInterval(() => {
@@ -76,7 +88,7 @@
                 updateUI();
                 if (timeLeft <= 0) {
                     clearInterval(timer);
-                    window.location.href = new URLSearchParams(window.location.search).get('U') || 'https://duckduckgo.com';
+                    window.location.href = redirectUrl || 'https://duckduckgo.com';
                 }
             }, 1000);
         }
